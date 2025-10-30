@@ -1,5 +1,5 @@
 use super::{Doc, Parsed};
-use crate::{doc::indexed::SearchKey, Indexed};
+use crate::{Indexed, doc::indexed::SearchKey};
 use rustdoc_types::{Crate, Id, Impl, ItemEnum, ItemKind, ItemSummary};
 use std::collections::HashMap;
 
@@ -33,7 +33,9 @@ impl Doc<Parsed> {
         let mut index: Vec<SearchKey> = krate
             .paths
             .iter()
-            .filter_map(|(id, item)| self.generate_searchkeys(id, item, &parent_map, &mut path_cache))
+            .filter_map(|(id, item)| {
+                self.generate_searchkeys(id, item, &parent_map, &mut path_cache)
+            })
             .flat_map(|vec| vec.into_iter())
             .collect();
 
@@ -42,16 +44,14 @@ impl Doc<Parsed> {
             if krate.paths.contains_key(id) {
                 continue;
             }
-            if let ItemEnum::Use(_) = &item.inner {
-                if let Some(path) =
-                    self.get_item_path_recursive(id, &parent_map, &mut path_cache)
-                {
-                    let key = path.join("::");
-                    index.push(SearchKey {
-                        id: id.0.to_string(),
-                        key,
-                    });
-                }
+            if let ItemEnum::Use(_) = &item.inner
+                && let Some(path) = self.get_item_path_recursive(id, &parent_map, &mut path_cache)
+            {
+                let key = path.join("::");
+                index.push(SearchKey {
+                    id: id.0.to_string(),
+                    key,
+                });
             }
         }
 
@@ -83,37 +83,37 @@ impl Doc<Parsed> {
 
         match kind {
             ItemKind::Struct => {
-                if let Some(item) = krate.index.get(id) {
-                    if let ItemEnum::Struct(s) = &item.inner {
-                        search_keys.extend(self.search_keys_structs(
-                            krate, s, &base_path, parent_map, path_cache,
-                        ));
-                    }
+                if let Some(item) = krate.index.get(id)
+                    && let ItemEnum::Struct(s) = &item.inner
+                {
+                    search_keys.extend(
+                        self.search_keys_structs(krate, s, &base_path, parent_map, path_cache),
+                    );
                 }
             }
             ItemKind::Enum => {
-                if let Some(item) = krate.index.get(id) {
-                    if let ItemEnum::Enum(e) = &item.inner {
-                        search_keys.extend(
-                            self.search_keys_enums(krate, e, &base_path, parent_map, path_cache),
-                        );
-                    }
+                if let Some(item) = krate.index.get(id)
+                    && let ItemEnum::Enum(e) = &item.inner
+                {
+                    search_keys.extend(
+                        self.search_keys_enums(krate, e, &base_path, parent_map, path_cache),
+                    );
                 }
             }
             ItemKind::Trait => {
-                if let Some(item) = krate.index.get(id) {
-                    if let ItemEnum::Trait(t) = &item.inner {
-                        search_keys.extend(Self::search_keys_traits(krate, t, &base_path));
-                    }
+                if let Some(item) = krate.index.get(id)
+                    && let ItemEnum::Trait(t) = &item.inner
+                {
+                    search_keys.extend(Self::search_keys_traits(krate, t, &base_path));
                 }
             }
             ItemKind::Union => {
-                if let Some(item) = krate.index.get(id) {
-                    if let ItemEnum::Union(u) = &item.inner {
-                        search_keys.extend(self.search_keys_unions(
-                            krate, u, &base_path, parent_map, path_cache,
-                        ));
-                    }
+                if let Some(item) = krate.index.get(id)
+                    && let ItemEnum::Union(u) = &item.inner
+                {
+                    search_keys.extend(
+                        self.search_keys_unions(krate, u, &base_path, parent_map, path_cache),
+                    );
                 }
             }
             _ => {}
