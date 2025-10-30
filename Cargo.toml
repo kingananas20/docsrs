@@ -5,7 +5,7 @@ edition = "2024"
 
 license = "MIT"
 description = "Easily retrieve docs for any crate on crates.io"
-repository = "https://github.com/kingananas20/fuzzdoc"
+repository = "https://github.com/kingananas20/docsrs"
 readme = "README.md"
 keywords = ["simple", "docs"]
 categories = ["api-bindings"]
@@ -33,14 +33,12 @@ serde = "1.0"
 serde_json = "1.0"
 thiserror = "2.0"
 ureq = { version = "3.0", optional = true }
-url = { version = "2.5" }
-zstd = { version = "0.13", optional = true }
+url = version = "2.5"
+zstd = "0.13"
 
 [features]
-default = ["parse"]
-parse = []
-decompress = ["parse", "zstd"]
-fetch = ["decompress", "ureq"]
+default = []
+fetch = ["ureq"]
 
 [dev-dependencies]
 env_logger = "0.11.8"

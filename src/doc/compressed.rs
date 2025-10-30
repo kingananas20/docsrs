@@ -1,4 +1,4 @@
-use super::{Doc, rawjson::RawJson};
+use super::{rawjson::RawJson, Doc};
 use crate::Error;
 use log::debug;
 use std::{fs, path::Path};
@@ -70,9 +70,9 @@ impl Doc<Compressed> {
     pub fn decompress(self) -> Result<Doc<RawJson>, Error> {
         use std::io::Read;
 
-        let mut data = self.0.0;
+        let mut data = self.0 .0;
 
-        while Self::is_compressed(&data) {
+        while Self::is_compressed(&data[..4]) {
             let mut decoder = zstd::Decoder::new(&data[..])?;
             let mut buffer = Vec::new();
             decoder.read_to_end(&mut buffer)?;

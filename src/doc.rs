@@ -3,9 +3,7 @@ mod remote;
 #[cfg(feature = "fetch")]
 pub use remote::Remote;
 
-#[cfg(feature = "decompress")]
 mod compressed;
-#[cfg(feature = "decompress")]
 pub use compressed::Compressed;
 
 mod rawjson;
@@ -81,8 +79,7 @@ mod tests {
         let hit = krate.search("tokio::spawn", 1).unwrap();
         let item = &hit[0];
         assert_eq!(
-            item.name,
-            "spawn",
+            item.name, "spawn",
             "unexpected item name, full item: {item:#?}"
         );
         assert_path_superset(&item.path, &["tokio", "task", "spawn", "spawn"]);
@@ -102,8 +99,7 @@ mod tests {
         let hits = krate.search("serde::Serialize", 1).unwrap();
         let item = &hits[0];
         assert_eq!(
-            item.name,
-            "Serialize",
+            item.name, "Serialize",
             "unexpected item name, full item: {item:#?}"
         );
         assert_path_superset(&item.path, &["serde", "Serialize"]);
@@ -145,26 +141,26 @@ mod tests {
         let hits = krate.search("lancedb::table::Table", 1).unwrap();
         let item = &hits[0];
         assert_eq!(
-            item.name,
-            "Table",
+            item.name, "Table",
             "unexpected item name, full item: {item:#?}"
         );
         assert!(item.docs.is_some(), "docs for Table should exist");
 
-        let hits = krate.search("lancedb::table::Table::create_index", 5).unwrap();
+        let hits = krate
+            .search("lancedb::table::Table::create_index", 5)
+            .unwrap();
         let item = hits
             .iter()
             .find(|item| item.name == "create_index")
             .expect("item `create_index` not found in search results");
         assert_eq!(
-            item.name,
-            "create_index",
+            item.name, "create_index",
             "unexpected item name, full item: {item:#?}"
         );
-        assert!(item.docs.is_some(), "docs for Table::create_index should exist");
-        assert_path_superset(
-            &item.path,
-            &["lancedb", "table", "Table", "create_index"],
+        assert!(
+            item.docs.is_some(),
+            "docs for Table::create_index should exist"
         );
+        assert_path_superset(&item.path, &["lancedb", "table", "Table", "create_index"]);
     }
 }

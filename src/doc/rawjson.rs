@@ -1,4 +1,4 @@
-use super::{Doc, parsed::Parsed};
+use super::{parsed::Parsed, Doc};
 use crate::Error;
 use log::debug;
 use rustdoc_types::Attribute;
@@ -13,7 +13,6 @@ use std::{fs, path::Path};
 pub struct RawJson(Vec<u8>);
 
 impl Doc<RawJson> {
-    #[cfg(feature = "decompress")]
     pub(super) fn new(data: Vec<u8>) -> Self {
         Self(RawJson(data))
     }

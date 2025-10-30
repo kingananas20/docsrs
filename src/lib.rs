@@ -125,11 +125,11 @@
 //!
 //!     let all_items = doc.search("", None).unwrap_or_default();
 //!     let documented = all_items.iter().filter(|item| item.docs.is_some()).count();
-//!     
+//!
 //!     println!("Total items: {}", all_items.len());
 //!     println!("Documented: {}", documented);
 //!     println!("Coverage: {:.1}%", (documented as f64 / all_items.len() as f64) * 100.0);
-//!     
+//!
 //!     Ok(())
 //! }
 //! ```
@@ -153,7 +153,6 @@ pub use doc::{Indexed, Parsed, RawJson};
 #[cfg(feature = "fetch")]
 pub use doc::Remote;
 
-#[cfg(feature = "decompress")]
 pub use doc::Compressed;
 
 pub use error::Error;
