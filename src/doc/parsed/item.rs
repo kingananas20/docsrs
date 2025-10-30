@@ -1,6 +1,6 @@
 use super::{Doc, Parsed};
 use crate::{Error, doc::indexed::SearchKey};
-use rustdoc_types::ItemEnum;
+use rustdoc_types::{Attribute, ItemEnum};
 use std::collections::HashMap;
 use url::Url;
 
@@ -74,7 +74,7 @@ pub struct Item {
     /// Links to other documentation items referenced in the docs
     pub links: HashMap<String, u32>,
     /// Rust attributes applied to this item (e.g., "#[derive(Debug)]")
-    pub attributes: Vec<String>,
+    pub attributes: Vec<Attribute>,
     /// Deprecation information if the item is deprecated
     pub deprecation: Option<rustdoc_types::Deprecation>,
     /// The actual item type and data (struct, enum, function, etc.)
