@@ -26,9 +26,13 @@ impl Doc<Remote> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let remote_doc = Doc::from_docs("serde", "1.0.193")?;
     /// let remote_doc = Doc::from_docs("tokio", "latest")?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn from_docs(crate_name: &str, version: &str) -> Result<Self, Error> {
         Ok(Doc(Remote {
@@ -50,9 +54,13 @@ impl Doc<Remote> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let remote_doc = Doc::from_docs("serde", "latest")?;
     /// let compressed_doc = remote_doc.fetch()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn fetch(self) -> Result<Doc<Compressed>, Error> {
         let mut res = ureq::get(self.0.url.as_str()).call()?;

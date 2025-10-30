@@ -2,6 +2,8 @@ mod enums;
 mod index;
 mod item;
 mod structs;
+mod traits;
+mod unions;
 
 use super::Doc;
 pub use item::Item;

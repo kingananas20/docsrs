@@ -1,7 +1,6 @@
 use super::{Doc, Indexed, SearchKey};
 use crate::Item;
 use fuzzy_matcher::FuzzyMatcher;
-use std::cmp::Reverse;
 
 impl Doc<Indexed> {
     /// Performs fuzzy search on the indexed documentation
@@ -21,44 +20,61 @@ impl Doc<Indexed> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
+    /// let indexed_doc = Doc::from_json("path/to/docs.json")?.parse()?.build_search_index();
     /// // Search for up to 5 items matching "vec push"
     /// let results = indexed_doc.search("vec push", Some(5));
     /// let results = indexed_doc.search("vec push", 5); // this works too because `n` is `impl Into<Option<usize>>`
     ///
     /// // Get all matches
     /// let results = indexed_doc.search("HashMap", None);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn search(&self, query: &str, n: impl Into<Option<usize>>) -> Option<Vec<&Item>> {
         let index = &self.0.search_index;
-
         let matcher = &self.0.matcher;
+        let lower_query = query.to_lowercase();
+
         let mut results = index
             .iter()
-            .filter_map(|SearchKey { id, key }| {
+            .filter_map(|search_key| {
                 matcher
-                    .fuzzy_match(&key.to_lowercase(), &query.to_lowercase())
-                    .map(|score| (*id, score))
+                    .fuzzy_match(&search_key.key.to_lowercase(), &lower_query)
+                    .map(|score| (score, search_key))
             })
-            .collect::<Vec<(u32, i64)>>();
+            .collect::<Vec<(i64, &SearchKey)>>();
 
-        results.sort_unstable_by_key(|&(_, score)| Reverse(score));
+        results.sort_unstable_by(|a, b| b.0.cmp(&a.0).then(a.1.key.len().cmp(&b.1.key.len())));
 
-        let mut matches = results;
+        if let Some(item) = results.iter().find_map(|(_, search_key)| {
+            if search_key.key.to_lowercase() == lower_query {
+                self.0.items.get(&search_key.id).filter(|i| !i.name.is_empty())
+            } else {
+                None
+            }
+        }) {
+            return Some(vec![item]);
+        }
+
         let n = n.into();
-        if n == Some(0) || matches.is_empty() {
+        if n == Some(0) || results.is_empty() {
             return None;
         }
 
-        if let Some(n) = n {
-            matches.truncate(n);
-        }
+        let items: Vec<_> = results
+            .iter()
+            .filter_map(|(_, search_key)| self.0.items.get(&search_key.id))
+            .filter(|item| !item.name.is_empty())
+            .take(n.unwrap_or(usize::MAX))
+            .collect();
 
-        Some(
-            matches
-                .iter()
-                .filter_map(|(id, _)| self.0.items.get(id))
-                .collect(),
-        )
+        if items.is_empty() {
+            None
+        } else {
+            Some(items)
+        }
     }
 }

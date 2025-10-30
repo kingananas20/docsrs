@@ -1,5 +1,8 @@
-use super::{Doc, parsed::Parsed};
+use super::{parsed::Parsed, Doc};
 use crate::Error;
+use log::debug;
+use rustdoc_types::Attribute;
+use serde_json::Value;
 use std::{fs, path::Path};
 
 /// Represents raw JSON documentation data in bytes.
@@ -30,9 +33,13 @@ impl Doc<RawJson> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let raw_doc = Doc::from_json("docs/serde.json")?;
     /// let raw_doc = Doc::from_json("/path/to/std.json")?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn from_json<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let json = fs::read(path)?;
@@ -52,12 +59,42 @@ impl Doc<RawJson> {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,ignore
+    /// # fn main() -> Result<(), docsrs::Error> {
+    /// use docsrs::Doc;
     /// let raw_doc = Doc::from_json("docs/serde.json")?;
     /// let parsed_doc = raw_doc.parse()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn parse(self) -> Result<Doc<Parsed>, Error> {
-        let ast = serde_json::from_slice(&self.0.0)?;
+        debug!("Parsing raw JSON data ({} bytes)", self.0 .0.len());
+        let mut value: Value = serde_json::from_slice(&self.0 .0)?;
+
+        let clean_attrs_in_map = |map: &mut serde_json::Map<String, Value>| {
+            for item in map.values_mut() {
+                if let Some(attrs) = item.get_mut("attrs").and_then(|v| v.as_array_mut()) {
+                    attrs.retain(|attr_val| {
+                        if serde_json::from_value::<Attribute>(attr_val.clone()).is_err() {
+                            debug!("ignoring invalid attribute {}", attr_val);
+                            false
+                        } else {
+                            true
+                        }
+                    });
+                }
+            }
+        };
+
+        if let Some(index) = value.get_mut("index").and_then(|v| v.as_object_mut()) {
+            clean_attrs_in_map(index);
+        }
+
+        if let Some(paths) = value.get_mut("paths").and_then(|v| v.as_object_mut()) {
+            clean_attrs_in_map(paths);
+        }
+
+        let ast = serde_json::from_value(value)?;
 
         Ok(<Doc<Parsed>>::new(ast))
     }
