@@ -82,7 +82,7 @@ mod tests {
             item.name, "spawn",
             "unexpected item name, full item: {item:#?}"
         );
-        assert_path_superset(&item.path, &["tokio", "task", "spawn", "spawn"]);
+        assert_path_superset(&item.path_components, &["tokio", "task", "spawn", "spawn"]);
     }
 
     #[test]
@@ -102,7 +102,7 @@ mod tests {
             item.name, "Serialize",
             "unexpected item name, full item: {item:#?}"
         );
-        assert_path_superset(&item.path, &["serde", "Serialize"]);
+        assert_path_superset(&item.path_components, &["serde", "Serialize"]);
     }
 
     #[test]
@@ -114,7 +114,9 @@ mod tests {
             path
         } else {
             println!("Skipping test `from_json`: env var `{STD_JSON_PATH_ENV}` not set.");
-            println!("Example: `export {STD_JSON_PATH_ENV}=/home/user/.rustup/toolchains/nightly/share/doc/rust/json/std.json`");
+            println!(
+                "Example: `export {STD_JSON_PATH_ENV}=/home/user/.rustup/toolchains/nightly/share/doc/rust/json/std.json`"
+            );
             return;
         };
 
@@ -161,6 +163,9 @@ mod tests {
             item.docs.is_some(),
             "docs for Table::create_index should exist"
         );
-        assert_path_superset(&item.path, &["lancedb", "table", "Table", "create_index"]);
+        assert_path_superset(
+            &item.path_components,
+            &["lancedb", "table", "Table", "create_index"],
+        );
     }
 }

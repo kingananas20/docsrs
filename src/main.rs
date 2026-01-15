@@ -12,7 +12,12 @@ struct Args {
     query: String,
 
     /// The version of the crate to search in
-    #[arg(short = 'v', long = "crate-version", default_value = "latest", value_name = "VERSION")]
+    #[arg(
+        short = 'v',
+        long = "crate-version",
+        default_value = "latest",
+        value_name = "VERSION"
+    )]
     crate_version: String,
 
     /// The number of search results to return
@@ -31,7 +36,7 @@ fn main() -> Result<(), Error> {
 
     if let Some(results) = doc.search(&args.query, Some(args.n)) {
         if let Some((first, rest)) = results.split_first() {
-            println!("{}", first.path.join("::"));
+            println!("{}", first.path);
             if let Some(docs) = &first.docs {
                 println!("\n{}", docs);
             }
@@ -39,7 +44,7 @@ fn main() -> Result<(), Error> {
             if !rest.is_empty() {
                 println!("\n---\n");
                 for item in rest {
-                    println!("{}", item.path.join("::"));
+                    println!("{}", item.path);
                 }
             }
         }

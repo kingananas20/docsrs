@@ -1,3 +1,4 @@
+mod get;
 mod search;
 
 use super::Doc;

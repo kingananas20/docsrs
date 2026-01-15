@@ -1,8 +1,7 @@
 use super::{Doc, Parsed};
-use crate::{doc::indexed::SearchKey, Error};
+use crate::doc::indexed::SearchKey;
 use rustdoc_types::{Attribute, Id, ItemEnum, ItemKind};
 use std::collections::HashMap;
-use url::Url;
 
 impl Doc<Parsed> {
     pub(super) fn build_items(
@@ -19,7 +18,9 @@ impl Doc<Parsed> {
             if let Ok(id_u32) = sk.id.parse::<u32>() {
                 let id = Id(id_u32);
                 if let Some(item) = self.0.ast.index.get(&id) {
-                    let path: Vec<String> = sk.key.split("::").map(String::from).collect();
+                    let path_components: Vec<String> =
+                        sk.key.split("::").map(String::from).collect();
+                    let path = path_components.join("::");
                     let kind = self.get_item_kind(&id);
                     let links = item
                         .links
@@ -32,6 +33,7 @@ impl Doc<Parsed> {
                             id: sk.id.clone(),
                             crate_id: item.crate_id,
                             crate_version: version.clone(),
+                            path_components,
                             path,
                             kind,
                             visibility: item.visibility.clone(),
@@ -101,7 +103,9 @@ pub struct Item {
     /// The crate version if given
     pub crate_version: Option<String>,
     /// Fully qualified path components (e.g., ["std", "collections", "HashMap"])
-    pub path: Vec<String>,
+    pub path_components: Vec<String>,
+    /// Fully qualified path (e.g. "std::collections::HashMap")
+    pub path: String,
     /// The kind of the item
     pub kind: Option<ItemKind>,
     /// Source code location information, if available
@@ -123,6 +127,7 @@ pub struct Item {
 }
 
 impl Item {
+    /*
     /// Returns the url for the item on docs.rs
     pub fn url(&self) -> Result<Option<Url>, Error> {
         if self.path.is_empty() {
@@ -133,7 +138,7 @@ impl Item {
             return Ok(None);
         };
 
-        let Some(crate_name) = self.path.first() else {
+        let Some(crate_name) = self.path_components.first() else {
             return Ok(None);
         };
 
@@ -142,7 +147,10 @@ impl Item {
         let mut url = Url::parse(&format!("https://docs.rs/{crate_name}/{version}"))?;
 
         let (path_prefix, file_name) = match kind {
-            ItemKind::Module => (self.path.get(1..).unwrap_or(&[]), "index.html".to_string()),
+            ItemKind::Module => (
+                self.path_components.get(1..).unwrap_or(&[]),
+                "index.html".to_string(),
+            ),
             ItemKind::Struct | ItemKind::Union | ItemKind::Enum | ItemKind::Trait => {
                 let prefix = match kind {
                     ItemKind::Struct => "struct",
@@ -185,5 +193,5 @@ impl Item {
         drop(path_segments);
 
         Ok(Some(url))
-    }
+    }*/
 }
