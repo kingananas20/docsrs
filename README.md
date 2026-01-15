@@ -1,5 +1,7 @@
 # docsrs
 
+# **DO NOT USE IT IN ITS CURRENT STATE**
+
 [![Crates.io](https://img.shields.io/crates/v/docsrs.svg)](https://crates.io/crates/docsrs)
 [![Docs.rs](https://docs.rs/docsrs/badge.svg)](https://docs.rs/docsrs)
 ![Status](https://img.shields.io/badge/status-beta-orange)
